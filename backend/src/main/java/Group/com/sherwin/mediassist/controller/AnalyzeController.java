@@ -5,6 +5,7 @@ import Group.com.sherwin.mediassist.service.PdfService;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Map;
 
 @RestController
@@ -26,35 +27,59 @@ public class AnalyzeController {
     @GetMapping("/analyze")
     public Map<String, String> analyze() throws Exception {
 
-        String path =
-                System.getProperty("user.dir")
-                        + "/uploads/BloodReport.pdf";
+        File uploadsFolder =
+                new File(System.getProperty("user.dir") + "/uploads");
 
-        String text = pdfService.extractText(path);
+        File[] files = uploadsFolder.listFiles(
+                (dir, name) -> name.toLowerCase().endsWith(".pdf")
+        );
+
+        if (files == null || files.length == 0) {
+            return Map.of("error", "No PDF files found");
+        }
+
+        File latestFile = Arrays.stream(files)
+                .max((f1, f2) -> Long.compare(
+                        f1.lastModified(),
+                        f2.lastModified()))
+                .orElse(files[0]);
+
+        String text =
+                pdfService.extractText(latestFile.getAbsolutePath());
 
         return Map.of(
-                "text",
-                text.substring(0, Math.min(text.length(), 2000))
+                "fileName", latestFile.getName(),
+                "text", text.substring(
+                        0,
+                        Math.min(text.length(), 2000)
+                )
         );
     }
 
     @GetMapping("/analyze-ai")
     public String analyzeAI() throws Exception {
 
-        File uploadsFolder = new File(
-                System.getProperty("user.dir") + "/uploads"
+        File uploadsFolder =
+                new File(System.getProperty("user.dir") + "/uploads");
+
+        File[] files = uploadsFolder.listFiles(
+                (dir, name) -> name.toLowerCase().endsWith(".pdf")
         );
 
-        File[] files = uploadsFolder.listFiles();
-
         if (files == null || files.length == 0) {
-            return "No uploaded files found";
+            return "No PDF files found";
         }
 
-        String filePath = files[0].getAbsolutePath();
+        File latestFile = Arrays.stream(files)
+                .max((f1, f2) -> Long.compare(
+                        f1.lastModified(),
+                        f2.lastModified()))
+                .orElse(files[0]);
 
         String extractedText =
-                pdfService.extractText(filePath);
+                pdfService.extractText(
+                        latestFile.getAbsolutePath()
+                );
 
         return aiService.generateSummary(extractedText);
     }

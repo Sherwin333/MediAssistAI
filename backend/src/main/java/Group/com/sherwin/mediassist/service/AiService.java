@@ -1,52 +1,73 @@
 package Group.com.sherwin.mediassist.service;
 
-import okhttp3.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 @Service
 public class AiService {
 
-    @Value("${gemini.api.key}")
-    private String apiKey;
+    public String generateSummary(String reportText) throws Exception {
 
-    public String generateSummary(String reportText) throws IOException {
+        URL url = new URL("http://localhost:11434/api/generate");
 
-        OkHttpClient client = new OkHttpClient();
+        HttpURLConnection conn =
+                (HttpURLConnection) url.openConnection();
+
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
 
         String prompt =
-                "Analyze this medical report. " +
-                "Give key findings and abnormalities:\n\n"
-                + reportText;
+                "Analyze this medical report and provide:\n" +
+                "1. Key findings\n" +
+                "2. Abnormal values\n" +
+                "3. Recommendations\n\n" +
+                reportText;
 
-        String json = """
-        {
-          "contents": [{
-            "parts": [{
-              "text": "%s"
-            }]
-          }]
+        String escapedPrompt = prompt
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "");
+
+        String json =
+                "{"
+                        + "\"model\":\"llama3.2\","
+                        + "\"prompt\":\"" + escapedPrompt + "\","
+                        + "\"stream\":false"
+                        + "}";
+
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(json.getBytes());
         }
-        """.formatted(prompt.replace("\"", "\\\""));
 
-        RequestBody body =
-                RequestBody.create(
-                        json,
-                        MediaType.parse("application/json")
-                );
+        int responseCode = conn.getResponseCode();
 
-        Request request = new Request.Builder()
-                .url(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="
-                    + apiKey
-                )
-                .post(body)
-                .build();
+        BufferedReader br;
 
-        Response response = client.newCall(request).execute();
+        if (responseCode >= 400) {
+            br = new BufferedReader(
+                    new InputStreamReader(conn.getErrorStream())
+            );
+        } else {
+            br = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream())
+            );
+        }
 
-        return response.body().string();
+        StringBuilder response = new StringBuilder();
+        String line;
+
+        while ((line = br.readLine()) != null) {
+            response.append(line);
+        }
+
+        System.out.println("OLLAMA RESPONSE:");
+        System.out.println(response);
+
+        return response.toString();
     }
 }

@@ -9,7 +9,7 @@ import java.net.URL;
 @Service
 public class AiService {
 
-    public String generateSummary(String reportText) throws Exception {
+    public String generateSummary(String prompt) throws Exception {
 
         URL url = new URL("http://localhost:11434/api/generate");
 
@@ -19,13 +19,6 @@ public class AiService {
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setDoOutput(true);
-
-        String prompt =
-                "Analyze this medical report and provide:\n" +
-                "1. Key findings\n" +
-                "2. Abnormal values\n" +
-                "3. Recommendations\n\n" +
-                reportText;
 
         String escapedPrompt = prompt
                 .replace("\\", "\\\\")
@@ -94,10 +87,43 @@ public class AiService {
             return ollamaResponse
                     .substring(start, end)
                     .replace("\\n", "\n")
-                    .replace("\\\"", "\"");
+                    .replace("\\\"", "\"")
+                    .replace("\\u003c", "<")
+                    .replace("\\u003e", ">")
+                    .replace("\\u0026", "&");
 
         } catch (Exception e) {
             return ollamaResponse;
         }
+    }
+
+    public String analyzeMedicalReport(
+            String reportText
+    ) throws Exception {
+
+        String prompt =
+                "Analyze this medical report and provide:\n" +
+                "1. Key findings\n" +
+                "2. Abnormal values\n" +
+                "3. Recommendations\n\n" +
+                reportText;
+
+        return generateSummary(prompt);
+    }
+
+    public String askQuestion(
+            String reportText,
+            String question
+    ) throws Exception {
+
+        String prompt =
+                "Medical Report:\n"
+                        + reportText
+                        + "\n\nQuestion:\n"
+                        + question
+                        + "\n\nAnswer based only on the report. "
+                        + "Do not make assumptions not present in the report.";
+
+        return generateSummary(prompt);
     }
 }

@@ -85,7 +85,7 @@ public class AnalyzeController {
                 );
 
         String rawResponse =
-                aiService.generateSummary(extractedText);
+                aiService.analyzeMedicalReport(extractedText);
 
         String summary =
                 aiService.extractSummary(rawResponse);

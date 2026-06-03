@@ -121,8 +121,13 @@ public class AiService {
                         + reportText
                         + "\n\nQuestion:\n"
                         + question
-                        + "\n\nAnswer based only on the report. "
-                        + "Do not make assumptions not present in the report.";
+                        + "\n\nInstructions:\n"
+                        + "Use the report findings when relevant. "
+                        + "If the question asks for medical education, "
+                        + "provide a helpful explanation while referring "
+                        + "to the report values. "
+                        + "Do not invent report values that are not present. "
+                        + "Keep the answer concise and easy to understand.";
 
         return generateSummary(prompt);
     }

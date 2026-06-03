@@ -65,9 +65,39 @@ public class AiService {
             response.append(line);
         }
 
-        System.out.println("OLLAMA RESPONSE:");
-        System.out.println(response);
-
         return response.toString();
+    }
+
+    public String extractSummary(String ollamaResponse) {
+
+        try {
+
+            int start =
+                    ollamaResponse.indexOf("\"response\":\"");
+
+            if (start == -1) {
+                return ollamaResponse;
+            }
+
+            start += 12;
+
+            int end =
+                    ollamaResponse.indexOf(
+                            "\",\"done\"",
+                            start
+                    );
+
+            if (end == -1) {
+                return ollamaResponse;
+            }
+
+            return ollamaResponse
+                    .substring(start, end)
+                    .replace("\\n", "\n")
+                    .replace("\\\"", "\"");
+
+        } catch (Exception e) {
+            return ollamaResponse;
+        }
     }
 }

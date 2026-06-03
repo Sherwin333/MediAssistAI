@@ -57,7 +57,7 @@ public class AnalyzeController {
     }
 
     @GetMapping("/analyze-ai")
-    public String analyzeAI() throws Exception {
+    public Map<String, String> analyzeAI() throws Exception {
 
         File uploadsFolder =
                 new File(System.getProperty("user.dir") + "/uploads");
@@ -67,7 +67,10 @@ public class AnalyzeController {
         );
 
         if (files == null || files.length == 0) {
-            return "No PDF files found";
+            return Map.of(
+                    "status", "error",
+                    "message", "No PDF files found"
+            );
         }
 
         File latestFile = Arrays.stream(files)
@@ -81,6 +84,16 @@ public class AnalyzeController {
                         latestFile.getAbsolutePath()
                 );
 
-        return aiService.generateSummary(extractedText);
+        String rawResponse =
+                aiService.generateSummary(extractedText);
+
+        String summary =
+                aiService.extractSummary(rawResponse);
+
+        return Map.of(
+                "status", "success",
+                "fileName", latestFile.getName(),
+                "summary", summary
+        );
     }
 }

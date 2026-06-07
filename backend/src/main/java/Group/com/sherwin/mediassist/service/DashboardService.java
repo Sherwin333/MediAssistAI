@@ -14,9 +14,17 @@ public class DashboardService {
 
         Map<String, String> data = new HashMap<>();
 
-        String ldl = findValue(text, "LDL");
-        String triglycerides = findValue(text, "Triglycerides");
-        String vitaminD = findValue(text, "Vitamin D");
+        String ldl =
+                findValue(text,
+                        "LDL Cholesterol|LDL-C|LDL");
+
+        String triglycerides =
+                findValue(text,
+                        "Triglycerides");
+
+        String vitaminD =
+                findValue(text,
+                        "Vitamin D");
 
         data.put("ldl", ldl);
         data.put("triglycerides", triglycerides);
@@ -27,20 +35,27 @@ public class DashboardService {
                 calculateRisk(ldl)
         );
 
+        System.out.println("LDL = " + ldl);
+        System.out.println("Triglycerides = " + triglycerides);
+        System.out.println("Vitamin D = " + vitaminD);
+
         return data;
     }
 
-    private String findValue(String text, String parameter) {
+    private String findValue(
+            String text,
+            String parameter) {
 
         Pattern pattern = Pattern.compile(
-                parameter + "\\s*[:\\-]?\\s*(\\d+\\.?\\d*)",
+                "(" + parameter + ")" +
+                        "\\s*:?\\s*(\\d+\\.?\\d*)",
                 Pattern.CASE_INSENSITIVE
         );
 
         Matcher matcher = pattern.matcher(text);
 
         if (matcher.find()) {
-            return matcher.group(1);
+            return matcher.group(2);
         }
 
         return "Not Found";

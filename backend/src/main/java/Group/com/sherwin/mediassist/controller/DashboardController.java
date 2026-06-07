@@ -29,6 +29,7 @@ public class DashboardController {
 
             String reportText =
                     pdfService.extractText(filePath);
+                    System.out.println(reportText);
 
             return dashboardService.extractMetrics(reportText);
 

@@ -9,7 +9,8 @@ function App() {
   const [summary, setSummary] = useState("");
 
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
+  const [chatHistory, setChatHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const uploadFile = async () => {
 
@@ -38,7 +39,7 @@ function App() {
       );
 
       setSummary("");
-      setAnswer("");
+      setChatHistory([]);
 
     } catch (error) {
 

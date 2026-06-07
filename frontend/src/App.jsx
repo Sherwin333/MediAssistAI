@@ -238,24 +238,104 @@ function App() {
           >
 
             <div style={cardStyle}>
-              <h3>Risk Level</h3>
-              <p>{dashboard.risk}</p>
-            </div>
+  <h3>Risk Level</h3>
 
-            <div style={cardStyle}>
-              <h3>LDL</h3>
-              <p>{dashboard.ldl}</p>
-            </div>
+  <p
+    style={{
+      color:
+        dashboard.risk === "High"
+          ? "#ef4444"
+          : dashboard.risk === "Moderate"
+          ? "#f59e0b"
+          : "#22c55e",
+      fontWeight: "bold",
+      fontSize: "20px"
+    }}
+  >
+    {dashboard.risk}
+  </p>
+</div>
 
-            <div style={cardStyle}>
-              <h3>Triglycerides</h3>
-              <p>{dashboard.triglycerides}</p>
-            </div>
+<div style={cardStyle}>
+  <h3>LDL</h3>
 
-            <div style={cardStyle}>
-              <h3>Vitamin D</h3>
-              <p>{dashboard.vitaminD}</p>
-            </div>
+  <p
+    style={{
+      fontSize: "24px",
+      fontWeight: "bold"
+    }}
+  >
+    {dashboard.ldl}
+  </p>
+
+  <small
+    style={{
+      color:
+        dashboard.ldlStatus === "High"
+          ? "#ef4444"
+          : dashboard.ldlStatus === "Borderline"
+          ? "#f59e0b"
+          : "#22c55e",
+      fontWeight: "bold"
+    }}
+  >
+    {dashboard.ldlStatus}
+  </small>
+</div>
+
+<div style={cardStyle}>
+  <h3>Triglycerides</h3>
+
+  <p
+    style={{
+      fontSize: "24px",
+      fontWeight: "bold"
+    }}
+  >
+    {dashboard.triglycerides}
+  </p>
+
+  <small
+    style={{
+      color:
+        dashboard.triglyceridesStatus === "High"
+          ? "#ef4444"
+          : dashboard.triglyceridesStatus === "Borderline"
+          ? "#f59e0b"
+          : "#22c55e",
+      fontWeight: "bold"
+    }}
+  >
+    {dashboard.triglyceridesStatus}
+  </small>
+</div>
+
+<div style={cardStyle}>
+  <h3>Vitamin D</h3>
+
+  <p
+    style={{
+      fontSize: "24px",
+      fontWeight: "bold"
+    }}
+  >
+    {dashboard.vitaminD}
+  </p>
+
+  <small
+    style={{
+      color:
+        dashboard.vitaminDStatus === "Deficient"
+          ? "#ef4444"
+          : dashboard.vitaminDStatus === "Insufficient"
+          ? "#f59e0b"
+          : "#22c55e",
+      fontWeight: "bold"
+    }}
+  >
+    {dashboard.vitaminDStatus}
+  </small>
+</div>
 
           </div>
 

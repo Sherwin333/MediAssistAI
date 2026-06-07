@@ -30,6 +30,15 @@ public class DashboardService {
         data.put("triglycerides", triglycerides);
         data.put("vitaminD", vitaminD);
 
+        data.put("ldlStatus",
+                getLDLStatus(ldl));
+
+        data.put("triglyceridesStatus",
+                getTriglyceridesStatus(triglycerides));
+
+        data.put("vitaminDStatus",
+                getVitaminDStatus(vitaminD));
+
         data.put(
                 "risk",
                 calculateRisk(ldl)
@@ -74,6 +83,68 @@ public class DashboardService {
                 return "Moderate";
 
             return "Low";
+
+        } catch (Exception e) {
+
+            return "Unknown";
+        }
+    }
+
+    private String getLDLStatus(String value) {
+
+        try {
+
+            double ldl = Double.parseDouble(value);
+
+            if (ldl > 160)
+                return "High";
+
+            if (ldl > 130)
+                return "Borderline";
+
+            return "Normal";
+
+        } catch (Exception e) {
+
+            return "Unknown";
+        }
+    }
+
+    private String getTriglyceridesStatus(String value) {
+
+        try {
+
+            double triglycerides =
+                    Double.parseDouble(value);
+
+            if (triglycerides > 200)
+                return "High";
+
+            if (triglycerides > 150)
+                return "Borderline";
+
+            return "Normal";
+
+        } catch (Exception e) {
+
+            return "Unknown";
+        }
+    }
+
+    private String getVitaminDStatus(String value) {
+
+        try {
+
+            double vitaminD =
+                    Double.parseDouble(value);
+
+            if (vitaminD < 20)
+                return "Deficient";
+
+            if (vitaminD < 30)
+                return "Insufficient";
+
+            return "Normal";
 
         } catch (Exception e) {
 

@@ -73,29 +73,59 @@ function App() {
 
   const askAI = async () => {
 
-    if (!question.trim()) {
-      return;
-    }
+  if (!question.trim()) {
+    return;
+  }
 
-    try {
+  try {
 
-      setAnswer("🤖 Thinking...");
+    setLoading(true);
 
-      const response = await axios.post(
-        "http://localhost:8080/api/chat",
-        {
-          question: question
-        }
-      );
+    const currentQuestion = question;
 
-      setAnswer(response.data.answer);
+    setQuestion("");
 
-    } catch (error) {
+    const response = await axios.post(
+      "http://localhost:8080/api/chat",
+      {
+        question: currentQuestion
+      }
+    );
 
-      console.error(error);
-      setAnswer("❌ Failed to get answer");
-    }
-  };
+    setChatHistory(prev => [
+      ...prev,
+      {
+        question: currentQuestion,
+        answer: response.data.answer
+      }
+    ]);
+
+  } catch (error) {
+
+    console.error(error);
+
+    setChatHistory(prev => [
+      ...prev,
+      {
+        question: question,
+        answer: "❌ Failed to get answer"
+      }
+    ]);
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
+<button
+  onClick={() => setChatHistory([])}
+  style={{
+    marginLeft: "10px"
+  }}
+>
+  Clear Chat
+</button>
 
   return (
     <div
@@ -193,19 +223,63 @@ function App() {
       <br />
 
       <div
+  style={{
+    border: "1px solid #ddd",
+    padding: "20px",
+    borderRadius: "12px",
+    minHeight: "200px"
+  }}
+>
+
+  {chatHistory.length === 0 && (
+    <p>No conversation yet.</p>
+  )}
+
+  {chatHistory.map((chat, index) => (
+
+    <div
+      key={index}
+      style={{
+        marginBottom: "20px"
+      }}
+    >
+
+      <div
         style={{
-          textAlign: "left",
-          border: "1px solid #ddd",
-          padding: "20px",
-          borderRadius: "12px",
-          minHeight: "150px",
-          lineHeight: "1.7"
+          background: "#f5f5f5",
+          padding: "10px",
+          borderRadius: "10px"
         }}
       >
-        <ReactMarkdown>
-          {answer}
-        </ReactMarkdown>
+        <strong>👤 You</strong>
+        <p>{chat.question}</p>
       </div>
+
+      <div
+        style={{
+          background: "#eef7ff",
+          padding: "10px",
+          borderRadius: "10px",
+          marginTop: "10px"
+        }}
+      >
+        <strong>🤖 MediAssist AI</strong>
+
+        <ReactMarkdown>
+          {chat.answer}
+        </ReactMarkdown>
+
+      </div>
+
+    </div>
+
+  ))}
+
+  {loading && (
+    <p>🤖 Thinking...</p>
+  )}
+
+</div>
 
     </div>
   );

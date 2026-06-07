@@ -29,7 +29,7 @@ public class FileUploadController {
                 uploadDir.mkdirs();
             }
 
-            String fileName = file.getOriginalFilename();
+            String fileName = "report.pdf";
 
             File destination = new File(uploadDir, fileName);
 

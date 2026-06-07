@@ -12,6 +12,17 @@ function App() {
   const [chatHistory, setChatHistory] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [dashboard, setDashboard] = useState(null);
+
+  const cardStyle = {
+    border: "1px solid #ddd",
+    borderRadius: "12px",
+    padding: "20px",
+    width: "180px",
+    textAlign: "center",
+    boxShadow: "0px 2px 8px rgba(0,0,0,0.1)"
+  };
+
   const uploadFile = async () => {
 
     if (!file) {
@@ -40,6 +51,7 @@ function App() {
 
       setSummary("");
       setChatHistory([]);
+      setDashboard(null);
 
     } catch (error) {
 
@@ -71,61 +83,70 @@ function App() {
     }
   };
 
+  const loadDashboard = async () => {
+
+    try {
+
+      const response = await axios.get(
+        "http://localhost:8080/api/dashboard"
+      );
+
+      setDashboard(response.data);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+  };
+
   const askAI = async () => {
 
-  if (!question.trim()) {
-    return;
-  }
+    if (!question.trim()) {
+      return;
+    }
 
-  try {
+    try {
 
-    setLoading(true);
+      setLoading(true);
 
-    const currentQuestion = question;
+      const currentQuestion = question;
 
-    setQuestion("");
+      setQuestion("");
 
-    const response = await axios.post(
-      "http://localhost:8080/api/chat",
-      {
-        question: currentQuestion
-      }
-    );
+      const response = await axios.post(
+        "http://localhost:8080/api/chat",
+        {
+          question: currentQuestion
+        }
+      );
 
-    setChatHistory(prev => [
-      ...prev,
-      {
-        question: currentQuestion,
-        answer: response.data.answer
-      }
-    ]);
+      setChatHistory(prev => [
+        ...prev,
+        {
+          question: currentQuestion,
+          answer: response.data.answer
+        }
+      ]);
 
-  } catch (error) {
+    } catch (error) {
 
-    console.error(error);
+      console.error(error);
 
-    setChatHistory(prev => [
-      ...prev,
-      {
-        question: question,
-        answer: "❌ Failed to get answer"
-      }
-    ]);
+      setChatHistory(prev => [
+        ...prev,
+        {
+          question: question,
+          answer: "❌ Failed to get answer"
+        }
+      ]);
 
-  } finally {
+    } finally {
 
-    setLoading(false);
+      setLoading(false);
 
-  }
-};
-<button
-  onClick={() => setChatHistory([])}
-  style={{
-    marginLeft: "10px"
-  }}
->
-  Clear Chat
-</button>
+    }
+  };
 
   return (
     <div
@@ -163,6 +184,15 @@ function App() {
           Analyze Report
         </button>
 
+        <button
+          onClick={loadDashboard}
+          style={{
+            marginLeft: "10px"
+          }}
+        >
+          View Dashboard
+        </button>
+
         <br /><br />
 
         <h3>{message}</h3>
@@ -189,6 +219,49 @@ function App() {
           {summary}
         </ReactMarkdown>
       </div>
+
+      {dashboard && (
+        <>
+          <br />
+
+          <h2 style={{ textAlign: "center" }}>
+            📊 Health Dashboard
+          </h2>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "20px",
+              justifyContent: "center",
+              flexWrap: "wrap"
+            }}
+          >
+
+            <div style={cardStyle}>
+              <h3>Risk Level</h3>
+              <p>{dashboard.risk}</p>
+            </div>
+
+            <div style={cardStyle}>
+              <h3>LDL</h3>
+              <p>{dashboard.ldl}</p>
+            </div>
+
+            <div style={cardStyle}>
+              <h3>Triglycerides</h3>
+              <p>{dashboard.triglycerides}</p>
+            </div>
+
+            <div style={cardStyle}>
+              <h3>Vitamin D</h3>
+              <p>{dashboard.vitaminD}</p>
+            </div>
+
+          </div>
+
+          <br />
+        </>
+      )}
 
       <hr />
 
@@ -218,68 +291,77 @@ function App() {
           Ask AI
         </button>
 
+        <button
+          onClick={() => setChatHistory([])}
+          style={{
+            marginLeft: "10px"
+          }}
+        >
+          Clear Chat
+        </button>
+
       </div>
 
       <br />
 
       <div
-  style={{
-    border: "1px solid #ddd",
-    padding: "20px",
-    borderRadius: "12px",
-    minHeight: "200px"
-  }}
->
-
-  {chatHistory.length === 0 && (
-    <p>No conversation yet.</p>
-  )}
-
-  {chatHistory.map((chat, index) => (
-
-    <div
-      key={index}
-      style={{
-        marginBottom: "20px"
-      }}
-    >
-
-      <div
         style={{
-          background: "#f5f5f5",
-          padding: "10px",
-          borderRadius: "10px"
+          border: "1px solid #ddd",
+          padding: "20px",
+          borderRadius: "12px",
+          minHeight: "200px"
         }}
       >
-        <strong>👤 You</strong>
-        <p>{chat.question}</p>
+
+        {chatHistory.length === 0 && (
+          <p>No conversation yet.</p>
+        )}
+
+        {chatHistory.map((chat, index) => (
+
+          <div
+            key={index}
+            style={{
+              marginBottom: "20px"
+            }}
+          >
+
+            <div
+              style={{
+                background: "#f5f5f5",
+                padding: "10px",
+                borderRadius: "10px"
+              }}
+            >
+              <strong>👤 You</strong>
+              <p>{chat.question}</p>
+            </div>
+
+            <div
+              style={{
+                background: "#eef7ff",
+                padding: "10px",
+                borderRadius: "10px",
+                marginTop: "10px"
+              }}
+            >
+              <strong>🤖 MediAssist AI</strong>
+
+              <ReactMarkdown>
+                {chat.answer}
+              </ReactMarkdown>
+
+            </div>
+
+          </div>
+
+        ))}
+
+        {loading && (
+          <p>🤖 Thinking...</p>
+        )}
+
       </div>
-
-      <div
-        style={{
-          background: "#eef7ff",
-          padding: "10px",
-          borderRadius: "10px",
-          marginTop: "10px"
-        }}
-      >
-        <strong>🤖 MediAssist AI</strong>
-
-        <ReactMarkdown>
-          {chat.answer}
-        </ReactMarkdown>
-
-      </div>
-
-    </div>
-
-  ))}
-
-  {loading && (
-    <p>🤖 Thinking...</p>
-  )}
-
-</div>
 
     </div>
   );

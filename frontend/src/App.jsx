@@ -13,6 +13,7 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const [dashboard, setDashboard] = useState(null);
+  const [reports, setReports] = useState([]);
 
   const cardStyle = {
     border: "1px solid #ddd",
@@ -99,6 +100,23 @@ function App() {
 
     }
   };
+
+  const loadReports = async () => {
+
+  try {
+
+    const response = await axios.get(
+      "http://localhost:8080/api/reports"
+    );
+
+    setReports(response.data);
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+};
 
   const askAI = async () => {
 
@@ -192,6 +210,15 @@ function App() {
         >
           View Dashboard
         </button>
+
+        <button
+  onClick={loadReports}
+  style={{
+    marginLeft: "10px"
+  }}
+>
+  My Reports
+</button>
 
         <br /><br />
 
@@ -340,6 +367,40 @@ function App() {
           </div>
 
           <br />
+        </>
+      )}
+
+      {reports.length > 0 && (
+
+        <>
+          <h2 style={{ textAlign: "center" }}>
+            📂 Uploaded Reports
+          </h2>
+
+          <div
+            style={{
+              border: "1px solid #ddd",
+              borderRadius: "12px",
+              padding: "20px",
+              marginBottom: "20px"
+            }}
+          >
+
+            {reports.map((report, index) => (
+
+              <div
+                key={index}
+                style={{
+                  padding: "10px",
+                  borderBottom: "1px solid #eee"
+                }}
+              >
+                📄 {report}
+              </div>
+
+            ))}
+
+          </div>
         </>
       )}
 
